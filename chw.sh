@@ -38,7 +38,7 @@ mount_all() {
     for DIR in $ALL_DIRS
     do
         trace "binding /${DIR} ${1}/${DIR}"
-        mount --bind /${DIR} ${1}/${DIR}
+        mountpoint -q ${1}/${DIR} || mount --bind /${DIR} ${1}/${DIR}
         echo "${DIR}" >> ${TMP_DIR_FILE}
     done
 }
