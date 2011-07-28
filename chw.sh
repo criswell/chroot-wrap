@@ -5,6 +5,7 @@
 # Very simple tool to wrap chrooting into a build environment
 #
 # Author: Samuel Hart, 2011, <hartsn@gmail.com>
+# https://bitbucket.org/criswell/chroot-wrap
 #
 # To the extent possible under law, the author(s) have dedicated all copyright
 # and related and neighboring rights to this software to the public domain
