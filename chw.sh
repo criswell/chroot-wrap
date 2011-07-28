@@ -37,9 +37,12 @@ mount_all() {
     touch ${TMP_DIR_FILE}
     for DIR in $ALL_DIRS
     do
-        trace "binding /${DIR} ${1}/${DIR}"
-        mountpoint -q ${1}/${DIR} || mount --bind /${DIR} ${1}/${DIR}
-        echo "${DIR}" >> ${TMP_DIR_FILE}
+        mountpoint -q ${1}/${DIR}
+        if [ $? -eq 1 ] ; then
+            trace "binding /${DIR} ${1}/${DIR}"
+            mount --bind /${DIR} ${1}/${DIR}
+            echo "${DIR}" >> ${TMP_DIR_FILE}
+        fi
     done
 }
 
@@ -63,7 +66,7 @@ make_bashrc() {
     clean_bashrc "${1}"
 
     echo "## CHR_BEGIN" >> ${1}/root/.bashrc
-    echo "PS1='\033[1;33m\](${MY_CWD}/${1})\033[0m\][\033[1;31m\]\u\033[0m\]@\033[1;31m\]\h\033[0m\] \033[1;31m\]\w\033[0m\]]\n\$ '" >> ${1}/root/.bashrc
+    echo "PS1='\033[1;33m\](${1})\033[0m\][\033[1;31m\]\u\033[0m\]@\033[1;31m\]\h\033[0m\] \033[1;31m\]\w\033[0m\]]\n# '" >> ${1}/root/.bashrc
     echo "export PS1" >> ${1}/root/.bashrc
     echo "## CHR_END" >> ${1}/root/.bashrc
 }
