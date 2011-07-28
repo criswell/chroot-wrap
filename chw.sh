@@ -37,35 +37,6 @@ trace() {
     echo "${DATESTAMP} : ${*}"
 }
 
-# Initializes the chw work environment if it is not there
-chw_init() {
-    if [ -d "$TMP_ROOT" ]; then
-        if [ -L "$TMP_ROOT" ]; then
-            # We don't play these sorts of shenanigans, nuke it..
-            rm "$TMP_ROOT"
-        else
-            # FIXME - Check for existing clients?
-            touch "${TMP_ROOT}/client_list"
-            echo "${SRC_PROC}" >> "${TMP_ROOT}/client_list"
-        fi
-    else
-        trace "First in- Making top-level chw work environment... ${TMP_ROOT}"
-        mkdir -p "$TMP_ROOT"
-        touch "${TMP_ROOT}/client_list"
-        echo "${SRC_PROC}" >> "${TMP_ROOT}/client_list"
-    fi
-}
-
-# Shutdown the chw work environment, if we're the last one out
-chw_shutdown() {
-    if [ -d "$TMP_ROOT" ]; then
-    else
-        trace "Something very bad has happened, our chw work environment seems to be missing!"
-        trace "Bailing on operation..."
-        exit 1
-    fi
-}
-
 mount_all() {
     touch ${TMP_DIR_FILE}
     for DIR in $ALL_DIRS
@@ -102,6 +73,43 @@ make_bashrc() {
     echo "PS1='\033[1;33m\](${1})\033[0m\][\033[1;31m\]\u\033[0m\]@\033[1;31m\]\h\033[0m\] \033[1;31m\]\w\033[0m\]]\n# '" >> ${1}/root/.bashrc
     echo "export PS1" >> ${1}/root/.bashrc
     echo "## CHR_END" >> ${1}/root/.bashrc
+}
+
+# Initializes the chw work environment if it is not there
+chw_init() {
+    if [ -d "$TMP_ROOT" ]; then
+        if [ -L "$TMP_ROOT" ]; then
+            # We don't play these sorts of shenanigans, nuke it..
+            rm "$TMP_ROOT"
+        else
+            # FIXME - Check for existing clients?
+            touch "${TMP_ROOT}/client_list"
+            echo "${SRC_PROC}" >> "${TMP_ROOT}/client_list"
+        fi
+    else
+        trace "First in- Making top-level chw work environment... ${TMP_ROOT}"
+        mkdir -p "$TMP_ROOT"
+        touch "${TMP_ROOT}/client_list"
+        echo "${SRC_PROC}" >> "${TMP_ROOT}/client_list"
+    fi
+}
+
+# Shutdown the chw work environment, if we're the last one out
+chw_shutdown() {
+    if [ -d "$TMP_ROOT" ]; then
+        grep -v $SRC_PROC "${TMP_ROOT}/client_list" > "${TMP_ROOT}/client_list.new"
+
+        rm -f "${TMP_ROOT}/client_list"
+        mv "${TMP_ROOT}/client_list.new" "${TMP_ROOT}/client_list"
+
+        if [ $(wc -l "${TMP_ROOT}/client_list" | cut -d ' ' -f1) -eq 0 ]; then
+            trace "Last out- cleaning up the chw work environment..."
+            umount_all "${1}"
+            clean_bashrc "${1}"
+        fi
+    else
+        trace "Something very bad has happened during shutdown, our chw work environment seems to be missing!"
+    fi
 }
 
 usage()
