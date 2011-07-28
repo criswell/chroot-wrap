@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# chroot_wrap.sh
+# chw.sh
 # --------------
 # Very simple tool to wrap chrooting into a build environment
 
