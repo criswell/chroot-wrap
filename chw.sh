@@ -29,7 +29,6 @@ SRC_PROC=$$
 
 MY_CWD=`pwd`
 
-#TMP_DIR_FILE=`mktemp /tmp/dirchw-XXXXXX`
 TMP_ROOT=/tmp/chw_work
 
 trace() {
@@ -38,25 +37,27 @@ trace() {
 }
 
 mount_all() {
-    touch ${TMP_DIR_FILE}
+    local CH_PATH=$(cat "{TMP_ROOT}/${1}.cfg")
     for DIR in $ALL_DIRS
     do
-        mountpoint -q ${1}/${DIR}
+        mountpoint -q ${CH_PATH}/${DIR}
         if [ $? -eq 1 ] ; then
-            trace "binding /${DIR} ${1}/${DIR}"
-            mount --bind /${DIR} ${1}/${DIR}
-            #echo "${DIR}" >> ${TMP_DIR_FILE}
+            trace "binding /${DIR} ${CH_PATH}/${DIR}"
+            mount --bind /${DIR} ${CH_PATH}/${DIR}
+            echo "${DIR}" >> "{TMP_ROOT}/${1}.mounts"
         fi
     done
 }
 
 umount_all() {
-    #REV_DIRS=$(sort -r ${TMP_DIR_FILE})
+    local CH_PATH=$(cat "{TMP_ROOT}/${1}.cfg")
+    REV_DIRS=$(sort -r "{TMP_ROOT}/${1}.mounts")
     for DIR in $REV_DIRS
     do
-        trace "unmounting /${DIR} ${1}/${DIR}"
-        umount ${1}/${DIR}
+        trace "unmounting /${DIR} ${CH_PATH}/${DIR}"
+        umount ${CH_PATH}/${DIR}
     done
+    rm -f "{TMP_ROOT}/${1}.mounts"
 }
 
 clean_bashrc() {
@@ -93,6 +94,19 @@ chw_rmclient() {
     mv "${TMP_ROOT}/${1}_client.new" "${TMP_ROOT}/${1}_clients"
 }
 
+chw_setupwrap() {
+    local CH_HASH=$1
+    local CH_PATH=$2
+    if [ ! -e "{TMP_ROOT}/${CH_HASH}.cfg" ]; then
+        touch "{TMP_ROOT}/${CH_HASH}.cfg"
+        echo "$CH_PATH" > "{TMP_ROOT}/${CH_HASH}.cfg"
+    fi
+
+    if [ ! -e "{TMP_ROOT}/${CH_HASH}.mounts" ]; then
+        touch "{TMP_ROOT}/${CH_HASH}.mounts"
+    fi
+}
+
 # Initializes the chw work environment if it is not there
 chw_init() {
     if [ -d "$TMP_ROOT" ]; then
@@ -100,13 +114,20 @@ chw_init() {
             # We don't play these sorts of shenanigans, nuke it..
             rm "$TMP_ROOT"
         else
-            # FIXME - Check for existing clients?
             chw_addclient "${1}"
+
+            chw_setupwrap "${1}" "${2}"
+            mount_all "${1}"
+            make_bashrc "${1}"
         fi
     else
         trace "First in- Making top-level chw work environment... ${TMP_ROOT}"
         mkdir -p "$TMP_ROOT"
         chw_addclient "${1}"
+
+        chw_setupwrap "${1}" "${2}"
+        mount_all "${1}"
+        make_bashrc "${1}"
     fi
 }
 
@@ -115,9 +136,11 @@ chw_shutdown() {
     if [ -d "$TMP_ROOT" ]; then
         chw_rmclient "${1}"
 
-        if [ $(wc -l "${TMP_ROOT}/${1}_clients"| cut -d ' ' -f1) -eq 0 ]; then
+        if [ $(wc -l "${TMP_ROOT}/${1}_clients" | cut -d ' ' -f1) -eq 0 ]; then
+            trace "Last out of chroot, cleaning up chroot..."
             umount_all "${1}"
             clean_bashrc "${1}"
+            rm -f "${TMP_ROOT}/${1}_clients"
         fi
 
         if [ $(wc -l "${TMP_ROOT}/client_list" | cut -d ' ' -f1) -eq 0 ]; then
@@ -154,20 +177,13 @@ fi
 if [ -n "$1" ]; then
     CHROOT_PATH=$1
 
-    #trace "temp file ${TMP_DIR_FILE}"
-
     # Check on the chroot path
     if [ -d "$CHROOT_PATH" ]; then
-            mount_all "$CHROOT_PATH"
+            HASH_ID=$(echo "${CHROOT_PATH}" | shasum
 
-            make_bashrc "${CHROOT_PATH}"
-
+            chw_init ${HASH_ID} ${CHROOT_PATH}
             chroot ${CHROOT_PATH}
-
-            umount_all "$CHROOT_PATH"
-            #rm -f ${TMP_DIR_FILE}
-
-            clean_bashrc "${CHROOT_PATH}"
+            chw_shutdown ${HASH_ID}
     else
         trace "The chroot path '${CHROOT_PATH}' does not exist or is not a directory!"
         exit 1
@@ -175,7 +191,6 @@ if [ -n "$1" ]; then
 else
     trace "Missing chroot path!"
     usage
-    #rm -f ${TMP_DIR_FILE}
 fi
 
 # vim:set ai et sts=4 sw=4 tw=80:
