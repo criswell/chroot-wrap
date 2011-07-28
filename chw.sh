@@ -25,13 +25,45 @@ EOF
 
 PROGNAME=${0##*/}
 
+SRC_PROC=$$
+
 MY_CWD=`pwd`
 
-TMP_DIR_FILE=`mktemp /tmp/dirchw-XXXXXX`
+#TMP_DIR_FILE=`mktemp /tmp/dirchw-XXXXXX`
+TMP_ROOT=/tmp/chw_work
 
 trace() {
     DATESTAMP=$(date +'%Y-%m-%d %H:%M:%S %Z')
     echo "${DATESTAMP} : ${*}"
+}
+
+# Initializes the chw work environment if it is not there
+chw_init() {
+    if [ -d "$TMP_ROOT" ]; then
+        if [ -L "$TMP_ROOT" ]; then
+            # We don't play these sorts of shenanigans, nuke it..
+            rm "$TMP_ROOT"
+        else
+            # FIXME - Check for existing clients?
+            touch "${TMP_ROOT}/client_list"
+            echo "${SRC_PROC}" >> "${TMP_ROOT}/client_list"
+        fi
+    else
+        trace "First in- Making top-level chw work environment... ${TMP_ROOT}"
+        mkdir -p "$TMP_ROOT"
+        touch "${TMP_ROOT}/client_list"
+        echo "${SRC_PROC}" >> "${TMP_ROOT}/client_list"
+    fi
+}
+
+# Shutdown the chw work environment, if we're the last one out
+chw_shutdown() {
+    if [ -d "$TMP_ROOT" ]; then
+    else
+        trace "Something very bad has happened, our chw work environment seems to be missing!"
+        trace "Bailing on operation..."
+        exit 1
+    fi
 }
 
 mount_all() {
@@ -42,13 +74,13 @@ mount_all() {
         if [ $? -eq 1 ] ; then
             trace "binding /${DIR} ${1}/${DIR}"
             mount --bind /${DIR} ${1}/${DIR}
-            echo "${DIR}" >> ${TMP_DIR_FILE}
+            #echo "${DIR}" >> ${TMP_DIR_FILE}
         fi
     done
 }
 
 umount_all() {
-    REV_DIRS=$(sort -r ${TMP_DIR_FILE})
+    #REV_DIRS=$(sort -r ${TMP_DIR_FILE})
     for DIR in $REV_DIRS
     do
         trace "unmounting /${DIR} ${1}/${DIR}"
@@ -96,7 +128,7 @@ fi
 if [ -n "$1" ]; then
     CHROOT_PATH=$1
 
-    trace "temp file ${TMP_DIR_FILE}"
+    #trace "temp file ${TMP_DIR_FILE}"
 
     # Check on the chroot path
     if [ -d "$CHROOT_PATH" ]; then
@@ -107,7 +139,7 @@ if [ -n "$1" ]; then
             chroot ${CHROOT_PATH}
 
             umount_all "$CHROOT_PATH"
-            rm -f ${TMP_DIR_FILE}
+            #rm -f ${TMP_DIR_FILE}
 
             clean_bashrc "${CHROOT_PATH}"
     else
@@ -117,7 +149,7 @@ if [ -n "$1" ]; then
 else
     trace "Missing chroot path!"
     usage
-    rm -f ${TMP_DIR_FILE}
+    #rm -f ${TMP_DIR_FILE}
 fi
 
 # vim:set ai et sts=4 sw=4 tw=80:
