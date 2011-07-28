@@ -61,19 +61,22 @@ umount_all() {
 }
 
 clean_bashrc() {
+    local CH_PATH=$(cat "{TMP_ROOT}/${1}.cfg")
     local TMP_FILE=`mktemp /tmp/chw-XXXXXX`
-    sed '/## CHR_BEGIN/,/## CHR_END/d' ${1}/root/.bashrc > ${TMP_FILE}
-    cp -f ${TMP_FILE} ${1}/root/.bashrc
+    sed '/## CHR_BEGIN/,/## CHR_END/d' ${CH_PATH}/root/.bashrc > ${TMP_FILE}
+    cp -f ${TMP_FILE} ${CH_PATH}/root/.bashrc
     rm -f ${TMP_FILE}
 }
 
 make_bashrc() {
     clean_bashrc "${1}"
 
-    echo "## CHR_BEGIN" >> ${1}/root/.bashrc
-    echo "PS1='\033[1;33m\](${1})\033[0m\][\033[1;31m\]\u\033[0m\]@\033[1;31m\]\h\033[0m\] \033[1;31m\]\w\033[0m\]]\n# '" >> ${1}/root/.bashrc
-    echo "export PS1" >> ${1}/root/.bashrc
-    echo "## CHR_END" >> ${1}/root/.bashrc
+    local CH_PATH=$(cat "{TMP_ROOT}/${1}.cfg")
+
+    echo "## CHR_BEGIN" >> ${CH_PATH}/root/.bashrc
+    echo "PS1='\033[1;33m\](${CH_PATH})\033[0m\][\033[1;31m\]\u\033[0m\]@\033[1;31m\]\h\033[0m\] \033[1;31m\]\w\033[0m\]]\n# '" >> ${CH_PATH}/root/.bashrc
+    echo "export PS1" >> ${CH_PATH}/root/.bashrc
+    echo "## CHR_END" >> ${CH_PATH}/root/.bashrc
 }
 
 chw_addclient() {
@@ -141,6 +144,7 @@ chw_shutdown() {
             umount_all "${1}"
             clean_bashrc "${1}"
             rm -f "${TMP_ROOT}/${1}_clients"
+            rm -f "${TMP_ROOT}/${1}.cfg"
         fi
 
         if [ $(wc -l "${TMP_ROOT}/client_list" | cut -d ' ' -f1) -eq 0 ]; then
