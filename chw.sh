@@ -4,7 +4,7 @@
 # --------------
 # Very simple tool to wrap chrooting into a build environment
 #
-# Author: Samuel Hart, 2011, hartsn@gmail.com
+# Author: Samuel Hart, 2011, <hartsn@gmail.com>
 #
 # To the extent possible under law, the author(s) have dedicated all copyright
 # and related and neighboring rights to this software to the public domain
