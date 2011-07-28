@@ -22,6 +22,8 @@ sys
 EOF
 )
 
+PROGNAME=${0##*/}
+
 MY_CWD=`pwd`
 
 TMP_DIR_FILE=`mktemp /tmp/dirchw-XXXXXX`
@@ -30,8 +32,6 @@ trace() {
     DATESTAMP=$(date +'%Y-%m-%d %H:%M:%S %Z')
     echo "${DATESTAMP} : ${*}"
 }
-
-trace "temp file ${TMP_DIR_FILE}"
 
 mount_all() {
     touch ${TMP_DIR_FILE}
@@ -68,6 +68,20 @@ make_bashrc() {
     echo "## CHR_END" >> ${1}/root/.bashrc
 }
 
+usage()
+{
+    cat <<EOF
+
+Usage: $PROGNAME CHROOT_PATH
+Where CHROOT_PATH is the path to a given chroot environment.
+
+$PROGNAME will set up the proper mount points for the chroot, and chroot into
+the environment.
+
+$PROGNAME must be run as root.
+EOF
+}
+
 # Must be run as root
 if [ "$(id -u)" != "0" ]; then
     trace "This script must be run as root!"
@@ -77,6 +91,8 @@ fi
 # Get our chroot path
 if [ -n "$1" ]; then
     CHROOT_PATH=$1
+
+    trace "temp file ${TMP_DIR_FILE}"
 
     # Check on the chroot path
     if [ -d "$CHROOT_PATH" ]; then
@@ -94,6 +110,10 @@ if [ -n "$1" ]; then
         trace "The chroot path '${CHROOT_PATH}' does not exist or is not a directory!"
         exit 1
     fi
+else
+    trace "Missing chroot path!"
+    usage
+    rm -f ${TMP_DIR_FILE}
 fi
 
 # vim:set ai et sts=4 sw=4 tw=80:
