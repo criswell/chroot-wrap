@@ -75,6 +75,24 @@ make_bashrc() {
     echo "## CHR_END" >> ${1}/root/.bashrc
 }
 
+chw_addclient() {
+    touch "${TMP_ROOT}/client_list"
+    echo "${SRC_PROC}" >> "${TMP_ROOT}/client_list"
+
+    touch "${TMP_ROOT}/${1}_clients"
+    echo "${SRC_PROC}" >> "${TMP_ROOT}/${1}_clients"
+}
+
+chw_rmclient() {
+    grep -v $SRC_PROC "${TMP_ROOT}/client_list" > "${TMP_ROOT}/client_list.new"
+    rm -f "${TMP_ROOT}/client_list"
+    mv "${TMP_ROOT}/client_list.new" "${TMP_ROOT}/client_list"
+
+    grep -v $SRC_PROC "${TMP_ROOT}/${1}_clients" > "${TMP_ROOT}/${1}_client.new"
+    rm -f "${TMP_ROOT}/${1}_clients"
+    mv "${TMP_ROOT}/${1}_client.new" "${TMP_ROOT}/${1}_clients"
+}
+
 # Initializes the chw work environment if it is not there
 chw_init() {
     if [ -d "$TMP_ROOT" ]; then
@@ -83,29 +101,29 @@ chw_init() {
             rm "$TMP_ROOT"
         else
             # FIXME - Check for existing clients?
-            touch "${TMP_ROOT}/client_list"
-            echo "${SRC_PROC}" >> "${TMP_ROOT}/client_list"
+            chw_addclient "${1}"
         fi
     else
         trace "First in- Making top-level chw work environment... ${TMP_ROOT}"
         mkdir -p "$TMP_ROOT"
-        touch "${TMP_ROOT}/client_list"
-        echo "${SRC_PROC}" >> "${TMP_ROOT}/client_list"
+        chw_addclient "${1}"
     fi
 }
 
 # Shutdown the chw work environment, if we're the last one out
 chw_shutdown() {
     if [ -d "$TMP_ROOT" ]; then
-        grep -v $SRC_PROC "${TMP_ROOT}/client_list" > "${TMP_ROOT}/client_list.new"
+        chw_rmclient "${1}"
 
-        rm -f "${TMP_ROOT}/client_list"
-        mv "${TMP_ROOT}/client_list.new" "${TMP_ROOT}/client_list"
+        if [ $(wc -l "${TMP_ROOT}/${1}_clients"| cut -d ' ' -f1) -eq 0 ]; then
+            umount_all "${1}"
+            clean_bashrc "${1}"
+        fi
 
         if [ $(wc -l "${TMP_ROOT}/client_list" | cut -d ' ' -f1) -eq 0 ]; then
             trace "Last out- cleaning up the chw work environment..."
-            umount_all "${1}"
-            clean_bashrc "${1}"
+            rm -f "${TMP_ROOT}/client_list"
+            rmdir "${TMP_ROOT}/client_list"
         fi
     else
         trace "Something very bad has happened during shutdown, our chw work environment seems to be missing!"
