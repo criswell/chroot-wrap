@@ -64,6 +64,8 @@ my intent):
 * sed
 * date
 * sort
+* chroot (do I really need to state the obvious?)
+# etc...
 
 (really standard stuff you'll find on many *nixes)
 
@@ -79,7 +81,7 @@ looking likely.
 Is there any configuration or debugging?
 ----------------------------------------
 
-Configuration? Nope. I'ts crazy stupid simple.
+Configuration? Nope. It's crazy stupid simple.
 
 Debugging? Well, there's stuff can be found in /tmp/chw_work, but I wouldn't
 recommend snooping there (and would advice against modifying anything in there)
@@ -110,6 +112,9 @@ will be chroots not properly setup or torn down, and chw work environment
 artifacts (e.g., worst case scenario shouldn't be *too* bad, provided you don't
 do something really stupid elsewhere).
 
+Also, chw kind of assumes bash will be in the chroot (it adds crap to a
+.bashrc in there). It probably would work without it, however, as it'll just
+leave a file in there that wont be used.
+
 Use at your own risk, and be smart about it. Obviously, there's no warranty or
 protection against the user using the script incorrectly.
-
