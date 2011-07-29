@@ -48,6 +48,29 @@ is doing. This can be used as a verification of when the chroot environment
 has been setup and cleaned up (even when the cleaning happens after a
 different chw instance).
 
+What are the requirements?
+--------------------------
+
+You'll need the following things (they should be found on many modern *nixes,
+Linux certainly, but possibly Mac OS, who knows? I'd rather fellate an angry
+rhino than own a Mac- Yes, I realize that's a dickish thing to say, that was
+my intent):
+
+* bash
+* mountpoint
+* mount / umount
+* cat
+* shasum
+
+How do you install it?
+----------------------
+
+Crap, you people really are demanding, aren't you?
+
+Copy the chw.sh script somewhere in your path. If I ever feel a need to make
+an installer, I'll add it to the repo (and update this text). But that isn't
+looking likely.
+
 Is there any configuration or debugging?
 ----------------------------------------
 
