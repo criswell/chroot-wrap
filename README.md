@@ -31,8 +31,8 @@ How do I use it?
 ----------------
 
 Once you have a chroot built (chw will not build chroots for you, it assumes
-you already have properly built chroots), you simply use it instead of the
-"chroot" command:
+you already have properly built chroots), you simply use it as root instead of
+the "chroot" command:
 
        chw.sh /some/path/to/the/chroot
 
@@ -42,3 +42,29 @@ be any format normally usable by chroot.
 Wrap every shell instance you want into your chroot with this command. When you
 are done, just "exit" as usual and chw will clean things up for you once every
 instance is finished.
+
+The chw script will display logging information to stdout telling you what it
+is doing. This can be used as a verification of when the chroot environment
+has been setup and cleaned up (even when the cleaning happens after a
+different chw instance).
+
+Is there any configuration or debugging?
+----------------------------------------
+
+Configuration? Nope. I'ts crazy stupid simple.
+
+Debugging? Well, there's stuff can be found in /tmp/chw_work, but I wouldn't
+recommend snooping there (and would advice against modifying anything in there)
+unless you know what you're doing.
+
+Frankly, I don't want to document how it works, so if you're curious, look at
+the damned code.
+
+Can this be used as a security tool?
+------------------------------------
+
+Sure it can. [Just like chroot.](https://lkml.org/lkml/2007/9/26/87)
+
+But seriously, I just use it for development environments. Beyond that, I'd
+recommend against using this or chroot for anything remotely resembling a
+security purpose.
