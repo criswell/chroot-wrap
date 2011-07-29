@@ -65,7 +65,7 @@ my intent):
 * date
 * sort
 * chroot (do I really need to state the obvious?)
-# etc...
+* etc...
 
 (really standard stuff you'll find on many *nixes)
 
