@@ -61,6 +61,11 @@ my intent):
 * mount / umount
 * cat
 * shasum
+* sed
+* date
+* sort
+
+(really standard stuff you'll find on many *nixes)
 
 How do you install it?
 ----------------------
