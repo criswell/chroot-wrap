@@ -37,21 +37,21 @@ trace() {
 }
 
 mount_all() {
-    local CH_PATH=$(cat "{TMP_ROOT}/${1}.cfg")
+    local CH_PATH=$(cat "${TMP_ROOT}/${1}.cfg")
     for DIR in $ALL_DIRS
     do
         mountpoint -q ${CH_PATH}/${DIR}
         if [ $? -eq 1 ] ; then
             trace "binding /${DIR} ${CH_PATH}/${DIR}"
             mount --bind /${DIR} ${CH_PATH}/${DIR}
-            echo "${DIR}" >> "{TMP_ROOT}/${1}.mounts"
+            echo "${DIR}" >> "${TMP_ROOT}/${1}.mounts"
         fi
     done
 }
 
 umount_all() {
-    local CH_PATH=$(cat "{TMP_ROOT}/${1}.cfg")
-    REV_DIRS=$(sort -r "{TMP_ROOT}/${1}.mounts")
+    local CH_PATH=$(cat "${TMP_ROOT}/${1}.cfg")
+    REV_DIRS=$(sort -r "${TMP_ROOT}/${1}.mounts")
     for DIR in $REV_DIRS
     do
         trace "unmounting /${DIR} ${CH_PATH}/${DIR}"
@@ -61,7 +61,7 @@ umount_all() {
 }
 
 clean_bashrc() {
-    local CH_PATH=$(cat "{TMP_ROOT}/${1}.cfg")
+    local CH_PATH=$(cat "${TMP_ROOT}/${1}.cfg")
     local TMP_FILE=`mktemp /tmp/chw-XXXXXX`
     sed '/## CHR_BEGIN/,/## CHR_END/d' ${CH_PATH}/root/.bashrc > ${TMP_FILE}
     cp -f ${TMP_FILE} ${CH_PATH}/root/.bashrc
@@ -71,7 +71,7 @@ clean_bashrc() {
 make_bashrc() {
     clean_bashrc "${1}"
 
-    local CH_PATH=$(cat "{TMP_ROOT}/${1}.cfg")
+    local CH_PATH=$(cat "${TMP_ROOT}/${1}.cfg")
 
     echo "## CHR_BEGIN" >> ${CH_PATH}/root/.bashrc
     echo "PS1='\033[1;33m\](${CH_PATH})\033[0m\][\033[1;31m\]\u\033[0m\]@\033[1;31m\]\h\033[0m\] \033[1;31m\]\w\033[0m\]]\n# '" >> ${CH_PATH}/root/.bashrc
@@ -100,13 +100,13 @@ chw_rmclient() {
 chw_setupwrap() {
     local CH_HASH=$1
     local CH_PATH=$2
-    if [ ! -e "{TMP_ROOT}/${CH_HASH}.cfg" ]; then
-        touch "{TMP_ROOT}/${CH_HASH}.cfg"
-        echo "$CH_PATH" > "{TMP_ROOT}/${CH_HASH}.cfg"
+    if [ ! -e "${TMP_ROOT}/${CH_HASH}.cfg" ]; then
+        touch "${TMP_ROOT}/${CH_HASH}.cfg"
+        echo "$CH_PATH" > "${TMP_ROOT}/${CH_HASH}.cfg"
     fi
 
-    if [ ! -e "{TMP_ROOT}/${CH_HASH}.mounts" ]; then
-        touch "{TMP_ROOT}/${CH_HASH}.mounts"
+    if [ ! -e "${TMP_ROOT}/${CH_HASH}.mounts" ]; then
+        touch "${TMP_ROOT}/${CH_HASH}.mounts"
     fi
 }
 
@@ -183,7 +183,7 @@ if [ -n "$1" ]; then
 
     # Check on the chroot path
     if [ -d "$CHROOT_PATH" ]; then
-            HASH_ID=$(echo "${CHROOT_PATH}" | shasum
+            HASH_ID=$(echo "${CHROOT_PATH}" | shasum | cut -d ' ' -f1)
 
             chw_init ${HASH_ID} ${CHROOT_PATH}
             chroot ${CHROOT_PATH}
