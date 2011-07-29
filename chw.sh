@@ -57,7 +57,7 @@ umount_all() {
         trace "unmounting /${DIR} ${CH_PATH}/${DIR}"
         umount ${CH_PATH}/${DIR}
     done
-    rm -f "{TMP_ROOT}/${1}.mounts"
+    rm -f "${TMP_ROOT}/${1}.mounts"
 }
 
 clean_bashrc() {
@@ -150,7 +150,7 @@ chw_shutdown() {
         if [ $(wc -l "${TMP_ROOT}/client_list" | cut -d ' ' -f1) -eq 0 ]; then
             trace "Last out- cleaning up the chw work environment..."
             rm -f "${TMP_ROOT}/client_list"
-            rmdir "${TMP_ROOT}/client_list"
+            rmdir "${TMP_ROOT}"
         fi
     else
         trace "Something very bad has happened during shutdown, our chw work environment seems to be missing!"
