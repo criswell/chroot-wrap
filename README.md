@@ -91,3 +91,20 @@ Sure it can. [Just like chroot.](https://lkml.org/lkml/2007/9/26/87)
 But seriously, I just use it for development environments. Beyond that, I'd
 recommend against using this or chroot for anything remotely resembling a
 security purpose.
+
+Are there other limitations?
+----------------------------
+
+Probably. There's no locking (and I have no intent to add it any time soon),
+so be careful not to launch multiple chw's (or exit multiple ones) at the
+**exact** same time. You can run multiple ones at once, of course (that's kind
+of the point), but just be sure you stagger their execution a bit.
+
+Honestly, the worst things that will happen if you don't stagger them a bit
+will be chroots not properly setup or torn down, and chw work environment
+artifacts (e.g., worst case scenario shouldn't be *too* bad, provided you don't
+do something really stupid elsewhere).
+
+Use at your own risk, and be smart about it. Obviously, there's no warranty or
+protection against the user using the script incorrectly.
+
