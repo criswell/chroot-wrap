@@ -180,7 +180,7 @@ fi
 # Get our chroot path
 if [ -n "$1" ]; then
     CHROOT_PATH=$1
-    shift 2
+    shift 1
 
     # Check on the chroot path
     if [ -d "$CHROOT_PATH" ]; then
