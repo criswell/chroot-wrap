@@ -161,7 +161,7 @@ usage()
 {
     cat <<EOF
 
-Usage: $PROGNAME CHROOT_PATH
+Usage: $PROGNAME CHROOT_PATH [OPTIONAL PARAMETERS PASSED TO CHROOT]
 Where CHROOT_PATH is the path to a given chroot environment.
 
 $PROGNAME will set up the proper mount points for the chroot, and chroot into
@@ -180,13 +180,14 @@ fi
 # Get our chroot path
 if [ -n "$1" ]; then
     CHROOT_PATH=$1
+    shift 2
 
     # Check on the chroot path
     if [ -d "$CHROOT_PATH" ]; then
             HASH_ID=$(echo "${CHROOT_PATH}" | shasum | cut -d ' ' -f1)
 
             chw_init ${HASH_ID} ${CHROOT_PATH}
-            chroot ${CHROOT_PATH}
+            chroot ${CHROOT_PATH} ${*}
             chw_shutdown ${HASH_ID}
     else
         trace "The chroot path '${CHROOT_PATH}' does not exist or is not a directory!"
