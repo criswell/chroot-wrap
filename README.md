@@ -78,6 +78,8 @@ Copy the chw.sh script somewhere in your path. If I ever feel a need to make
 an installer, I'll add it to the repo (and update this text). But that isn't
 looking likely.
 
+FINE! Installer added. Of course, I was getting sick of doing it manually.
+
 Is there any configuration or debugging?
 ----------------------------------------
 
