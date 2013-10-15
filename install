@@ -3,3 +3,12 @@
 # Installer
 # ----------------
 # Alright, I got sick of not having an installer...
+
+if [ -f "chw.sh" ]; then
+    INST_ROOT="/usr/local"
+    if [ -n "$1" ]; then
+        INST_ROOT=$1
+    fi
+    echo "Installing to '${INST_ROOT}/bin/chw'...."
+    install chw.sh $INST_ROOT/bin/chw
+fi
